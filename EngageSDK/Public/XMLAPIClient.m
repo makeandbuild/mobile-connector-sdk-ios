@@ -8,8 +8,6 @@
 
 #import "XMLAPIClient.h"
 #import "EngageResponseXML.h"
-#import "EngageConfig.h"
-#import "ResultDictionary.h"
 
 @interface XMLAPIClient()
 
@@ -31,21 +29,23 @@ __strong static XMLAPIClient *_sharedClient = nil;
                         host:(NSString *)hostUrl
               connectSuccess:(void (^)(AFOAuthCredential *credential))success
                      failure:(void (^)(NSError *error))failure {
-    
+
     static dispatch_once_t pred = 0;
     dispatch_once(&pred, ^{
         _sharedClient = [[self alloc] initWithHost:hostUrl clientId:clientId secret:secret token:refreshToken];
         _sharedClient.apiCache = [[NSMutableArray alloc] init];
         _sharedClient.hasBeenInitiallyAuthenticated = NO;
-        
+
         [[_sharedClient operationQueue] setSuspended:YES];
-        
+
         //Perform the login to the system.
         [_sharedClient authenticateInternal:^(AFOAuthCredential *credential) {
             _sharedClient.hasBeenInitiallyAuthenticated = YES;
             NSLog(@"Authentication refresh complete");
             if (success != nil)
                 success(credential);
+            // broadcast that user is logged in now
+            [[NSNotificationCenter defaultCenter] postNotificationName:USER_LOGGED_IN_EVENT object:nil];
         } failure:^(NSError *error) {
             NSLog(@"Failed to refresh OAuth2 token for authentication");
             [[_sharedClient operationQueue] setSuspended:YES];
@@ -64,15 +64,15 @@ __strong static XMLAPIClient *_sharedClient = nil;
 
 - (void)authenticateInternal:(void (^)(AFOAuthCredential *credential))success
                      failure:(void (^)(NSError *error))failure {
-    
+
     [[_sharedClient operationQueue] setSuspended:YES];
-    
+
     //Perform the login to the system.
     [_sharedClient authenticate:^(AFOAuthCredential *credential) {
         if (success) {
             success(credential);
         }
-        
+
         for (int i = 0; i < [self.apiCache count]; i++) {
             ((PostResourceBlock)[self.apiCache objectAtIndex:i])();
         }
@@ -87,14 +87,14 @@ __strong static XMLAPIClient *_sharedClient = nil;
 - (void)postResource:(XMLAPI *)api
              success:(void (^)(ResultDictionary *ERXML))success
              failure:(void (^)(NSError *error))failure {
-    
+
     PostResourceBlock postResource = ^(void) {
         NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:[api envelope], @"xml", nil];
-        
+
         [_sharedClient.requestSerializer setValue:[NSString stringWithFormat:@"Bearer %@", [self.credential accessToken]] forHTTPHeaderField:@"Authorization"];
         _sharedClient.responseSerializer = [AFXMLParserResponseSerializer serializer];
         NSLog(@"POSTING %@", params);
-        
+
         [_sharedClient POST:@"/XMLAPI" parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
             ResultDictionary *ERXML = [EngageResponseXML decode:responseObject];
             if (success) {
@@ -106,7 +106,7 @@ __strong static XMLAPIClient *_sharedClient = nil;
             }
         }];
     };
-    
+
     if (![_sharedClient isAuthenticated]) {
         if (self.hasBeenInitiallyAuthenticated) {
             //We need to refresh our token.
@@ -118,14 +118,14 @@ __strong static XMLAPIClient *_sharedClient = nil;
                 [[_sharedClient operationQueue] setSuspended:YES];
             }];
         }
-        
+
         //Place the postResource() block in the cache to be executed on authenticate complete.
         [_sharedClient.apiCache addObject:postResource];
-        
+
     } else {
         postResource();
     }
-    
+
 }
 
 @end
