@@ -40,8 +40,13 @@ __strong static XMLAPIManager *_sharedInstance = nil;
                            host:hostUrl
                  connectSuccess:^(AFOAuthCredential *credential) {
                      NSLog(@"Successfully authenticated connection to Engage API");
+                     if (success != nil)
+                         success(credential);
                  } failure:^(NSError *error) {
                      NSLog(@"Failed to authenticate connection to Engage API%@", error);
+                     if (failure != nil)
+                         failure(error);
+
                  }];
         
         _sharedInstance.ecm = [EngageConfigManager sharedInstance];        
@@ -67,7 +72,7 @@ __strong static XMLAPIManager *_sharedInstance = nil;
 - (void)postXMLAPI:(XMLAPI *)xmlapi
            success:(void (^)(ResultDictionary *ERXML))success
            failure:(void (^)(NSError *error))failure {
-    [[XMLAPIClient client] postResource:xmlapi success:nil failure:nil];
+    [[XMLAPIClient client] postResource:xmlapi success:success failure:failure];
 }
 
 
@@ -84,7 +89,12 @@ __strong static XMLAPIManager *_sharedInstance = nil;
                        NSLog(@"Successfully created anonymous user with id %@", userId);
                    }
                    success(ERXML);
-               } failure:failure];
+               } failure:^(NSError *error) {
+                   NSLog(@"error posting to anonymous");
+                   if (failure != nil)
+                       failure(error);
+               }
+     ];
 }
 
 - (void)updateAnonymousToPrimaryUser:(NSString *)userId

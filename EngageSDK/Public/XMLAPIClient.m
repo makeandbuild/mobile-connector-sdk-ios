@@ -44,9 +44,13 @@ __strong static XMLAPIClient *_sharedClient = nil;
         [_sharedClient authenticateInternal:^(AFOAuthCredential *credential) {
             _sharedClient.hasBeenInitiallyAuthenticated = YES;
             NSLog(@"Authentication refresh complete");
+            if (success != nil)
+                success(credential);
         } failure:^(NSError *error) {
             NSLog(@"Failed to refresh OAuth2 token for authentication");
             [[_sharedClient operationQueue] setSuspended:YES];
+            if (failure != nil)
+                failure(error);
         }];
     });
     return _sharedClient;
@@ -89,6 +93,7 @@ __strong static XMLAPIClient *_sharedClient = nil;
         
         [_sharedClient.requestSerializer setValue:[NSString stringWithFormat:@"Bearer %@", [self.credential accessToken]] forHTTPHeaderField:@"Authorization"];
         _sharedClient.responseSerializer = [AFXMLParserResponseSerializer serializer];
+        NSLog(@"POSTING %@", params);
         
         [_sharedClient POST:@"/XMLAPI" parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
             ResultDictionary *ERXML = [EngageResponseXML decode:responseObject];
