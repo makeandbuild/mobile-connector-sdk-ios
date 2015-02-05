@@ -54,6 +54,8 @@ __strong static NSString *engageListId = nil;
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:anonymousId forKey:@"engageAnonymousId"];
     [defaults synchronize];
+    // broadcast that the anonymous id is now known
+    [[NSNotificationCenter defaultCenter] postNotificationName:PRIMARY_USER_OR_ANONYMOUS_ID_SET object:nil];
 }
 
 + (NSString *)primaryUserId {
@@ -69,7 +71,7 @@ __strong static NSString *engageListId = nil;
     [defaults synchronize];
 
     // broadcast that the primary user id is now known
-    [[NSNotificationCenter defaultCenter] postNotificationName:PRIMARY_USER_ID_SET object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:PRIMARY_USER_OR_ANONYMOUS_ID_SET object:nil];
 }
 
 

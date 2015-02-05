@@ -12,7 +12,7 @@
 //Defines NotificaitonCenter event names
 #define AUGMENTATION_SUCCESSFUL_EVENT @"AugmentationSuccessfulEvent"
 #define AUGMENTATION_EXPIRED_EVENT @"AugmentationExpiredEvent"
-#define PRIMARY_USER_ID_SET @"PrimaryUserIdSetEvent"
+#define PRIMARY_USER_OR_ANONYMOUS_ID_SET @"PrimaryUserOrAnonymousIdSetEvent"
 
 
 #define ENGAGE_CONFIG_BUNDLE @"EngageConfigPlist.bundle"

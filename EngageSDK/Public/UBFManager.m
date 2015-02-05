@@ -147,16 +147,15 @@ __strong static UBFManager *_sharedInstance = nil;
  * installed event so it will include the user id info.
  */
 + (void)waitForUserIdThenCreateInstalledEvent {
-    NSString *primaryUserId = [EngageConfig primaryUserId];
-    // is the primary id already set?
-    if (primaryUserId && [primaryUserId length] > 0) {
+    if ([EngageConfig primaryUserId] && [[EngageConfig primaryUserId] length] > 0) {
         [_sharedInstance trackEvent:[UBF installed:nil]];
-    }
-    // otherwise, wait for it to be set
-    else {
+    } else if ([EngageConfig anonymousId] && [[EngageConfig anonymousId] length] > 0) {
+        [_sharedInstance trackEvent:[UBF installed:nil]];
+    } else {
+        // otherwise, wait for it to be set
         NSLog(@"Registering listener for primary user id event: Installed Event");
         __block id installedEventComplete;
-        installedEventComplete = [[NSNotificationCenter defaultCenter] addObserverForName:PRIMARY_USER_ID_SET
+        installedEventComplete = [[NSNotificationCenter defaultCenter] addObserverForName:PRIMARY_USER_OR_ANONYMOUS_ID_SET
                                                                                    object:nil
                                                                                     queue:[NSOperationQueue mainQueue]
                                                                                usingBlock:^(NSNotification *note) {
@@ -240,16 +239,15 @@ __strong static UBFManager *_sharedInstance = nil;
  * installed event so it will include the user info.
  */
 - (void)waitForUserIdThenCreateSessionStartedEvent {
-    NSString *primaryUserId = [EngageConfig primaryUserId];
-    // is the primary id already set?
-    if (primaryUserId && [primaryUserId length] > 0) {
-        [self trackEvent:[UBF sessionStarted:nil withCampaign:[EngageConfig currentCampaign]]];
-    }
-    // wait for it to be set
-    else {
+    if ([EngageConfig primaryUserId] && [[EngageConfig primaryUserId] length] > 0) {
+        [_sharedInstance trackEvent:[UBF installed:nil]];
+    } else if ([EngageConfig anonymousId] && [[EngageConfig anonymousId] length] > 0) {
+        [_sharedInstance trackEvent:[UBF installed:nil]];
+    } else {
+        // otherwise, wait for it to be set
         NSLog(@"Registering listener for user primary user id event: Session Started Event");
         __block id sessionStartedEventComplete;
-        sessionStartedEventComplete = [[NSNotificationCenter defaultCenter] addObserverForName:PRIMARY_USER_ID_SET
+        sessionStartedEventComplete = [[NSNotificationCenter defaultCenter] addObserverForName:PRIMARY_USER_OR_ANONYMOUS_ID_SET
                                                                                         object:nil
                                                                                          queue:[NSOperationQueue mainQueue]
                                                                                     usingBlock:^(NSNotification *note) {
