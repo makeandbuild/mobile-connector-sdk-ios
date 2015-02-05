@@ -74,7 +74,7 @@
 }
 
 - (BOOL)locationServicesEnabled {
-    return (BOOL)[[self.configs objectForKey:@"LocationServices"] objectForKey:@"enabled"];
+    return (BOOL) [[[self.configs objectForKey:@"LocationServices"] valueForKey:@"enabled"] intValue];
 }
 
 - (NSString *)fieldNameForUBF:(NSString *)ubfFieldConstantName {
