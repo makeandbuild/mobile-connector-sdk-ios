@@ -84,8 +84,8 @@ __strong static EngageEventLocationManager *_sharedInstance = nil;
 }
 
 
-- (BOOL)locationServicesEnabled {
-    if ([[EngageConfigManager sharedInstance] locationServicesEnabled] && self.locationServicesSupported) {
++ (BOOL)locationServicesEnabled {
+    if ([[EngageConfigManager sharedInstance] locationServicesEnabled] && [[EngageEventLocationManager sharedInstance]locationServicesSupported]) {
         return YES;
     } else {
         return NO;

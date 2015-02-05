@@ -72,7 +72,9 @@ __strong static UBFManager *_sharedInstance = nil;
                      }
                  }];
         
-        _sharedInstance.engageEventLocationManager = [[EngageEventLocationManager alloc] init];
+        if ([EngageEventLocationManager locationServicesEnabled]) {
+            _sharedInstance.engageEventLocationManager = [[EngageEventLocationManager alloc] init];
+        }
         _sharedInstance.engageLocalEventStore = [[EngageLocalEventStore alloc] init];
         _sharedInstance.ecm = [EngageConfigManager sharedInstance];
         
