@@ -45,7 +45,6 @@ __strong static XMLAPIClient *_sharedClient = nil;
             if (success != nil)
                 success(credential);
             // broadcast that user is logged in now
-            [[NSNotificationCenter defaultCenter] postNotificationName:USER_LOGGED_IN_EVENT object:nil];
         } failure:^(NSError *error) {
             NSLog(@"Failed to refresh OAuth2 token for authentication");
             [[_sharedClient operationQueue] setSuspended:YES];

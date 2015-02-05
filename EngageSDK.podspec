@@ -7,7 +7,7 @@ Pod::Spec.new do |s|
   s.license         = { :type => 'Apache 2.0', :file => 'License.txt' }
   s.source          = { :git => 'https://github.com/makeandbuild/mobile-connector-sdk-ios', :tag => '1.0.1' }
   s.ios.xcconfig    = { 'FRAMEWORK_SEARCH_PATHS' => '$(inherited) "$(SDKROOT)/Developer/Library/Frameworks" "$(DEVELOPER_LIBRARY_DIR)/Frameworks"' }
-  s.ios.deployment_target = '7.0'
+  s.ios.deployment_target = '7.1'
   s.source_files = 'EngageSDK/*/*.{h,m}'
   s.public_header_files = 'EngageSDK/Public/*.h'
   s.requires_arc = true
