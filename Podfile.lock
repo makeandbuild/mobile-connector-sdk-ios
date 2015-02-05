@@ -23,7 +23,7 @@ PODS:
   - MobileDeepLinking-iOS (0.2.0)
 
 DEPENDENCIES:
-  - AFNetworking (= 2.2.3)
+  - AFNetworking (~> 2.2.3)
   - AFOAuth2Client@phoenixplatform (~> 0.1)
   - MobileDeepLinking-iOS (~> 0.2)
 
