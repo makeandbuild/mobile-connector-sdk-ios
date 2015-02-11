@@ -52,6 +52,7 @@ __strong static UBFManager *_sharedInstance = nil;
     
     static dispatch_once_t pred = 0;
     dispatch_once(&pred, ^{
+        NSLog(@"UBFManager.createClient 201502111200");
         _sharedInstance = [[UBFManager alloc] init];
         [EngageConfig storeEngageListId:engageListId];
         _sharedInstance.sessionTimeout = [[EngageConfigManager sharedInstance] longConfigForSessionValue:PLIST_SESSION_LIFECYCLE_EXPIRATION];
@@ -72,7 +73,7 @@ __strong static UBFManager *_sharedInstance = nil;
                      }
                  }];
         
-        if ([EngageEventLocationManager locationServicesEnabled]) {
+        if ([[EngageConfigManager sharedInstance] locationServicesEnabled] && [EngageEventLocationManager locationServicesEnabled]) {
             _sharedInstance.engageEventLocationManager = [[EngageEventLocationManager alloc] init];
         }
         _sharedInstance.engageLocalEventStore = [[EngageLocalEventStore alloc] init];
@@ -83,7 +84,7 @@ __strong static UBFManager *_sharedInstance = nil;
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         NSString *installed = [defaults objectForKey:kEngageClientInstalled];
         if (![installed boolValue]) { // nil or false
-
+            NSLog(@"EngageSDK - Application has been installed/ran for the first time");
             [UBFManager waitForUserIdThenCreateInstalledEvent];
 
             NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -103,8 +104,8 @@ __strong static UBFManager *_sharedInstance = nil;
                 [xmlApiClient postResource:addLastKnownLocationColumn success:nil failure:nil];
                 [xmlApiClient postResource:addLastKnownLocationTimeColumn success:nil failure:nil];
             }
-            
-            
+        } else {
+            NSLog(@"EngageSDK - Application has already been installed/ran");
         }
         
         // start session
@@ -150,18 +151,20 @@ __strong static UBFManager *_sharedInstance = nil;
  */
 + (void)waitForUserIdThenCreateInstalledEvent {
     if ([EngageConfig primaryUserId] && [[EngageConfig primaryUserId] length] > 0) {
+        NSLog(@"installedEvent primaryUserId set, posting");
         [_sharedInstance trackEvent:[UBF installed:nil]];
     } else if ([EngageConfig anonymousId] && [[EngageConfig anonymousId] length] > 0) {
+        NSLog(@"installedEvent anonymousId set, posting");
         [_sharedInstance trackEvent:[UBF installed:nil]];
     } else {
         // otherwise, wait for it to be set
-        NSLog(@"Registering listener for primary user id event: Installed Event");
+        NSLog(@"installedEvent registering listener for PRIMARY_USER_OR_ANONYMOUS_ID_SET");
         __block id installedEventComplete;
         installedEventComplete = [[NSNotificationCenter defaultCenter] addObserverForName:PRIMARY_USER_OR_ANONYMOUS_ID_SET
                                                                                    object:nil
                                                                                     queue:[NSOperationQueue mainQueue]
                                                                                usingBlock:^(NSNotification *note) {
-                                                                                   NSLog(@"Primary User Id is set.  Creating installed event");
+                                                                                   NSLog(@"installedEvent PRIMARY_USER_OR_ANONYMOUD_ID_SET_EVENT received");
                                                                                    // now that we have a user id we can create the installed event
                                                                                    [_sharedInstance trackEvent:[UBF installed:nil]];
 
@@ -242,18 +245,20 @@ __strong static UBFManager *_sharedInstance = nil;
  */
 - (void)waitForUserIdThenCreateSessionStartedEvent {
     if ([EngageConfig primaryUserId] && [[EngageConfig primaryUserId] length] > 0) {
+        NSLog(@"sessionEvent primaryUserId set, posting");
         [_sharedInstance trackEvent:[UBF installed:nil]];
     } else if ([EngageConfig anonymousId] && [[EngageConfig anonymousId] length] > 0) {
+        NSLog(@"sessionEvent anonymousId set, posting");
         [_sharedInstance trackEvent:[UBF installed:nil]];
     } else {
         // otherwise, wait for it to be set
-        NSLog(@"Registering listener for user primary user id event: Session Started Event");
+        NSLog(@"sessionEvent registering listener for PRIMARY_USER_OR_ANONYMOUS_ID_SET");
         __block id sessionStartedEventComplete;
         sessionStartedEventComplete = [[NSNotificationCenter defaultCenter] addObserverForName:PRIMARY_USER_OR_ANONYMOUS_ID_SET
                                                                                         object:nil
                                                                                          queue:[NSOperationQueue mainQueue]
                                                                                     usingBlock:^(NSNotification *note) {
-                                                                                        NSLog(@"Primary User Id is set.  Creating session started event.");
+                                                                                        NSLog(@"sessionEvent PRIMARY_USER_OR_ANONYMOUD_ID_SET_EVENT received");
                                                                                         // now that we have a user id we can create the session started event
                                                                                         [self trackEvent:[UBF sessionStarted:nil withCampaign:[EngageConfig currentCampaign]]];
 

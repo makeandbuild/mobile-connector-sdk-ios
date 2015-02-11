@@ -31,6 +31,7 @@ __strong static XMLAPIManager *_sharedInstance = nil;
     
     static dispatch_once_t pred = 0;
     dispatch_once(&pred, ^{
+        NSLog(@"XMLAPIManager.createClient 201502111200");
         _sharedInstance = [[XMLAPIManager alloc] init];
         [EngageConfig storeEngageListId:engageListId];
         
